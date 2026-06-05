@@ -5,35 +5,10 @@
  * Test spec with inline (dereferenced) enum properties
  * OpenAPI spec version: 1.0.0
  */
-import { faker } from '@faker-js/faker';
-
 import { HttpResponse, http } from 'msw';
 import type { RequestHandlerOptions } from 'msw';
 
 import type { Template } from '../model';
-
-export const getGetTemplateResponseMock = (
-  overrideResponse: Partial<Extract<Template, object>> = {},
-): Template => ({
-  id: faker.number.int(),
-  status: faker.helpers.arrayElement([
-    faker.helpers.arrayElement([
-      'DRAFT',
-      'PUBLISHED',
-      'ARCHIVED',
-    ] as Template['status'][]),
-    undefined,
-  ]),
-  category: faker.helpers.arrayElement([
-    faker.helpers.arrayElement([
-      'SOFTWARE',
-      'CREATIVE',
-      'BUSINESS',
-    ] as Template['category'][]),
-    undefined,
-  ]),
-  ...overrideResponse,
-});
 
 export const getGetTemplateMockHandler = (
   overrideResponse?:
@@ -51,7 +26,7 @@ export const getGetTemplateMockHandler = (
           ? typeof overrideResponse === 'function'
             ? await overrideResponse(info)
             : overrideResponse
-          : getGetTemplateResponseMock(),
+          : undefined,
         { status: 200 },
       );
     },

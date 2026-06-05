@@ -20,6 +20,11 @@ import { getMockFileExtensionByTypeName } from '../utils/file-extensions';
 import { writeGeneratedFile } from './file';
 import { getFinalizeMockImplementationOptions } from './finalize-mock-implementation';
 import { generateImportsForBuilder } from './generate-imports-for-builder';
+import {
+  buildCrossFileFakerImports,
+  collapseMswFakerFullOutputs,
+  flattenMockOutput,
+} from './mock-outputs';
 import { generateTarget } from './target';
 import { getOrvalGeneratedTypes, getTypedResponse } from './types';
 
@@ -48,7 +53,7 @@ export async function writeSplitMode({
     const {
       imports,
       implementation,
-      mockOutputs,
+      mockOutputsFull,
       mutators,
       clientMutators,
       formData,
@@ -57,6 +62,9 @@ export async function writeSplitMode({
       paramsFilter,
       fetchReviver,
     } = generateTarget(builder, output);
+
+    const collapsedFull = collapseMswFakerFullOutputs(mockOutputsFull);
+    const mockOutputs = collapsedFull.map((m) => flattenMockOutput(m));
 
     let implementationData = header;
 
@@ -175,17 +183,35 @@ export async function writeSplitMode({
     // `getMockFileExtensionByTypeName(entry)` (e.g. `msw` or `faker`) — producing
     // files like `petstore.msw.ts` / `petstore.faker.ts`.
     const mockPaths: string[] = [];
+
+    const hasFaker = mockOutputs.some((m) => m.type === OutputMockType.FAKER);
+    const fakerImplementation =
+      mockOutputs.find((m) => m.type === OutputMockType.FAKER)
+        ?.implementation ?? '';
+
     const writtenMockExtensions = new Set<OutputMockType>();
     for (const mockOutput of mockOutputs) {
       const entry = output.mock.generators.find(
         (g): g is GlobalMockOptions =>
           !isFunction(g) && g.type === mockOutput.type,
       );
+
       if (!entry) continue;
 
+      const extraImports =
+        hasFaker && mockOutput.type === OutputMockType.MSW
+          ? buildCrossFileFakerImports(
+              path.join(dirname, filename + '.msw' + extension),
+              path.join(dirname, filename + '.faker' + extension),
+              mockOutput.implementation,
+              fakerImplementation,
+            )
+          : [];
+
+      const allMockImports = [...mockOutput.imports, ...extraImports];
       const importsMockForBuilder = generateImportsForBuilder(
         output,
-        mockOutput.imports,
+        allMockImports,
         relativeSchemasPath,
       );
       let mockData = header;

@@ -4,12 +4,8 @@
  * Swagger Petstore
  * OpenAPI spec version: 1.0.0
  */
-import { faker } from '@faker-js/faker';
-
 import { HttpResponse, http } from 'msw';
 import type { RequestHandlerOptions } from 'msw';
-
-export const getHealthCheckResponseMock = (): string => faker.word.sample();
 
 export const getHealthCheckMockHandler = (
   overrideResponse?:
@@ -27,7 +23,7 @@ export const getHealthCheckMockHandler = (
           ? typeof overrideResponse === 'function'
             ? await overrideResponse(info)
             : overrideResponse
-          : getHealthCheckResponseMock();
+          : undefined;
       const textBody =
         typeof resolvedBody === 'string'
           ? resolvedBody

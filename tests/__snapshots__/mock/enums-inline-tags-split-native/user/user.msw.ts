@@ -5,33 +5,10 @@
  * Test spec with inline (dereferenced) enum properties
  * OpenAPI spec version: 1.0.0
  */
-import { faker } from '@faker-js/faker';
-
 import { HttpResponse, http } from 'msw';
 import type { RequestHandlerOptions } from 'msw';
 
 import type { User } from '../model';
-
-export const getGetUserResponseMock = (
-  overrideResponse: Partial<Extract<User, object>> = {},
-): User => ({
-  id: faker.number.int(),
-  name: faker.string.alpha({ length: { min: 10, max: 20 } }),
-  countryCode: faker.helpers.arrayElement([
-    faker.helpers.arrayElement([
-      'US',
-      'JP',
-      'DE',
-      'FR',
-    ] as User['countryCode'][]),
-    undefined,
-  ]),
-  language: faker.helpers.arrayElement([
-    faker.helpers.arrayElement(['EN', 'JP'] as User['language'][]),
-    undefined,
-  ]),
-  ...overrideResponse,
-});
 
 export const getGetUserMockHandler = (
   overrideResponse?:
@@ -49,7 +26,7 @@ export const getGetUserMockHandler = (
           ? typeof overrideResponse === 'function'
             ? await overrideResponse(info)
             : overrideResponse
-          : getGetUserResponseMock(),
+          : undefined,
         { status: 200 },
       );
     },

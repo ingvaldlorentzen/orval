@@ -4,29 +4,10 @@
  * Issue 3269 - Nullable anyOf $ref + tags-split + msw
  * OpenAPI spec version: 0.0.1
  */
-import { faker } from '@faker-js/faker';
-
 import { HttpResponse, http } from 'msw';
 import type { RequestHandlerOptions } from 'msw';
 
 import type { Widget } from '../model';
-
-export const getGetWidgetResponseMock = (): Widget | null =>
-  faker.helpers.arrayElement([
-    {
-      id: faker.string.alpha({ length: { min: 10, max: 20 } }),
-      label: faker.string.alpha({ length: { min: 10, max: 20 } }),
-    },
-    null,
-  ]);
-
-export const getCreateWidgetResponseMock = (
-  overrideResponse: Partial<Extract<Widget, object>> = {},
-): Widget => ({
-  id: faker.string.alpha({ length: { min: 10, max: 20 } }),
-  label: faker.string.alpha({ length: { min: 10, max: 20 } }),
-  ...overrideResponse,
-});
 
 export const getGetWidgetMockHandler = (
   overrideResponse?:
@@ -45,7 +26,7 @@ export const getGetWidgetMockHandler = (
           ? typeof overrideResponse === 'function'
             ? await overrideResponse(info)
             : overrideResponse
-          : getGetWidgetResponseMock(),
+          : undefined,
         { status: 200 },
       );
     },
@@ -69,7 +50,7 @@ export const getCreateWidgetMockHandler = (
           ? typeof overrideResponse === 'function'
             ? await overrideResponse(info)
             : overrideResponse
-          : getCreateWidgetResponseMock(),
+          : undefined,
         { status: 201 },
       );
     },
