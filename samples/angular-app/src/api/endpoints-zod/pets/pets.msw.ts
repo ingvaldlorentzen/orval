@@ -4,241 +4,10 @@
  * Swagger Petstore
  * OpenAPI spec version: 1.0.0
  */
-import { faker } from '@faker-js/faker';
-
 import { HttpResponse, http } from 'msw';
 import type { RequestHandlerOptions } from 'msw';
 
 import type { Pet, Pets } from '../model';
-
-export const getSearchPetsResponseMock = (): Pets =>
-  Array.from(
-    { length: faker.number.int({ min: 1, max: 100 }) },
-    (_, i) => i + 1,
-  ).map(() => ({
-    id: faker.number.int({ min: 1 }),
-    name: (() => faker.person.lastName())(),
-    tag: (() => faker.person.lastName())(),
-    email: faker.helpers.arrayElement([faker.internet.email(), undefined]),
-    status: faker.helpers.arrayElement([
-      'available',
-      'pending',
-      'sold',
-    ] as const),
-    age: faker.helpers.arrayElement([
-      faker.number.int({ min: 0, max: 30 }),
-      undefined,
-    ]),
-    rating: faker.helpers.arrayElement([
-      faker.number.float({ min: 0, max: 5, multipleOf: 0.5 }),
-      undefined,
-    ]),
-    phone: (() =>
-      faker.helpers.arrayElement([
-        `+1${faker.string.numeric({ length: 10 })}`,
-        undefined,
-      ]))(),
-    requiredNullableString: faker.helpers.arrayElement([
-      faker.string.alpha({ length: { min: 10, max: 20 } }),
-      null,
-    ]),
-    optionalNullableString: faker.helpers.arrayElement([
-      faker.helpers.arrayElement([
-        faker.string.alpha({ length: { min: 10, max: 20 } }),
-        null,
-      ]),
-      undefined,
-    ]),
-  }));
-
-export const getListPetsResponseMock = (): Pets =>
-  faker.helpers.arrayElement([
-    Array.from(
-      { length: faker.number.int({ min: 1, max: 100 }) },
-      (_, i) => i + 1,
-    ).map(() => ({
-      id: (() => faker.number.int({ min: 1, max: 99999 }))(),
-      name: (() => faker.person.lastName())(),
-      tag: (() => faker.person.lastName())(),
-      email: faker.helpers.arrayElement([faker.internet.email(), undefined]),
-      status: faker.helpers.arrayElement([
-        'available',
-        'pending',
-        'sold',
-      ] as const),
-      age: faker.helpers.arrayElement([
-        faker.number.int({ min: 0, max: 30 }),
-        undefined,
-      ]),
-      rating: faker.helpers.arrayElement([
-        faker.number.float({ min: 0, max: 5, multipleOf: 0.5 }),
-        undefined,
-      ]),
-      phone: (() =>
-        faker.helpers.arrayElement([
-          `+1${faker.string.numeric({ length: 10 })}`,
-          undefined,
-        ]))(),
-      requiredNullableString: faker.helpers.arrayElement([
-        faker.string.alpha({ length: { min: 10, max: 20 } }),
-        null,
-      ]),
-      optionalNullableString: faker.helpers.arrayElement([
-        faker.helpers.arrayElement([
-          faker.string.alpha({ length: { min: 10, max: 20 } }),
-          null,
-        ]),
-        undefined,
-      ]),
-    })),
-    Array.from(
-      { length: faker.number.int({ min: 1, max: 100 }) },
-      (_, i) => i + 1,
-    ).map(() => ({
-      id: (() => faker.number.int({ min: 1, max: 99999 }))(),
-      name: (() => faker.person.lastName())(),
-      tag: (() => faker.person.lastName())(),
-      email: faker.helpers.arrayElement([faker.internet.email(), undefined]),
-      status: faker.helpers.arrayElement([
-        'available',
-        'pending',
-        'sold',
-      ] as const),
-      age: faker.helpers.arrayElement([
-        faker.number.int({ min: 0, max: 30 }),
-        undefined,
-      ]),
-      rating: faker.helpers.arrayElement([
-        faker.number.float({ min: 0, max: 5, multipleOf: 0.5 }),
-        undefined,
-      ]),
-      phone: (() =>
-        faker.helpers.arrayElement([
-          `+1${faker.string.numeric({ length: 10 })}`,
-          undefined,
-        ]))(),
-      requiredNullableString: faker.helpers.arrayElement([
-        faker.string.alpha({ length: { min: 10, max: 20 } }),
-        null,
-      ]),
-      optionalNullableString: faker.helpers.arrayElement([
-        faker.helpers.arrayElement([
-          faker.string.alpha({ length: { min: 10, max: 20 } }),
-          null,
-        ]),
-        undefined,
-      ]),
-    })),
-  ]);
-
-export const getShowPetByIdResponseMock = () =>
-  (() => ({
-    id: faker.number.int({ min: 1, max: 99 }),
-    name: faker.person.firstName(),
-    tag: faker.helpers.arrayElement([faker.word.sample(), undefined]),
-    status: faker.helpers.arrayElement(['available', 'pending', 'sold']),
-    requiredNullableString: null,
-    optionalNullableString: faker.helpers.arrayElement([
-      faker.word.sample(),
-      null,
-      undefined,
-    ]),
-    phone: faker.helpers.arrayElement([
-      `+1${faker.string.numeric({ length: 10 })}`,
-      undefined,
-    ]),
-  }))();
-
-export const getUpdatePetByIdResponseMock = (
-  overrideResponse: Partial<Extract<Pet | string, object>> = {},
-): Pet | string =>
-  faker.helpers.arrayElement([
-    {
-      id: faker.number.int({ min: 1 }),
-      name: (() => faker.person.lastName())(),
-      tag: (() => faker.person.lastName())(),
-      email: faker.helpers.arrayElement([faker.internet.email(), undefined]),
-      status: faker.helpers.arrayElement([
-        'available',
-        'pending',
-        'sold',
-      ] as const),
-      age: faker.helpers.arrayElement([
-        faker.number.int({ min: 0, max: 30 }),
-        undefined,
-      ]),
-      rating: faker.helpers.arrayElement([
-        faker.number.float({ min: 0, max: 5, multipleOf: 0.5 }),
-        undefined,
-      ]),
-      phone: (() =>
-        faker.helpers.arrayElement([
-          `+1${faker.string.numeric({ length: 10 })}`,
-          undefined,
-        ]))(),
-      requiredNullableString: faker.helpers.arrayElement([
-        faker.string.alpha({ length: { min: 10, max: 20 } }),
-        null,
-      ]),
-      optionalNullableString: faker.helpers.arrayElement([
-        faker.helpers.arrayElement([
-          faker.string.alpha({ length: { min: 10, max: 20 } }),
-          null,
-        ]),
-        undefined,
-      ]),
-      ...overrideResponse,
-    },
-    faker.word.sample(),
-  ]);
-
-export const getPatchPetByIdResponseMock = (
-  overrideResponse: Partial<Extract<Pet | string, object>> = {},
-): Pet | string =>
-  faker.helpers.arrayElement([
-    {
-      id: faker.number.int({ min: 1 }),
-      name: (() => faker.person.lastName())(),
-      tag: (() => faker.person.lastName())(),
-      email: faker.helpers.arrayElement([faker.internet.email(), undefined]),
-      status: faker.helpers.arrayElement([
-        'available',
-        'pending',
-        'sold',
-      ] as const),
-      age: faker.helpers.arrayElement([
-        faker.number.int({ min: 0, max: 30 }),
-        undefined,
-      ]),
-      rating: faker.helpers.arrayElement([
-        faker.number.float({ min: 0, max: 5, multipleOf: 0.5 }),
-        undefined,
-      ]),
-      phone: (() =>
-        faker.helpers.arrayElement([
-          `+1${faker.string.numeric({ length: 10 })}`,
-          undefined,
-        ]))(),
-      requiredNullableString: faker.helpers.arrayElement([
-        faker.string.alpha({ length: { min: 10, max: 20 } }),
-        null,
-      ]),
-      optionalNullableString: faker.helpers.arrayElement([
-        faker.helpers.arrayElement([
-          faker.string.alpha({ length: { min: 10, max: 20 } }),
-          null,
-        ]),
-        undefined,
-      ]),
-      ...overrideResponse,
-    },
-    faker.word.sample(),
-  ]);
-
-export const getShowPetTextResponseMock = (): string => faker.word.sample();
-
-export const getDownloadFileResponseMock = (): ArrayBuffer =>
-  new ArrayBuffer(faker.number.int({ min: 1, max: 64 }));
 
 export const getSearchPetsMockHandler = (
   overrideResponse?:
@@ -256,7 +25,7 @@ export const getSearchPetsMockHandler = (
           ? typeof overrideResponse === 'function'
             ? await overrideResponse(info)
             : overrideResponse
-          : getSearchPetsResponseMock(),
+          : undefined,
         { status: 200 },
       );
     },
@@ -280,7 +49,7 @@ export const getListPetsMockHandler = (
           ? typeof overrideResponse === 'function'
             ? await overrideResponse(info)
             : overrideResponse
-          : getListPetsResponseMock(),
+          : undefined,
         { status: 200 },
       );
     },
@@ -326,7 +95,7 @@ export const getShowPetByIdMockHandler = (
           ? typeof overrideResponse === 'function'
             ? await overrideResponse(info)
             : overrideResponse
-          : getShowPetByIdResponseMock();
+          : undefined;
       return typeof resolvedBody === 'string'
         ? HttpResponse.text(resolvedBody, { status: 200 })
         : HttpResponse.json(resolvedBody, { status: 200 });
@@ -352,7 +121,7 @@ export const getUpdatePetByIdMockHandler = (
           ? typeof overrideResponse === 'function'
             ? await overrideResponse(info)
             : overrideResponse
-          : getUpdatePetByIdResponseMock();
+          : undefined;
       return typeof resolvedBody === 'string'
         ? HttpResponse.text(resolvedBody, { status: 200 })
         : HttpResponse.json(resolvedBody, { status: 200 });
@@ -378,7 +147,7 @@ export const getPatchPetByIdMockHandler = (
           ? typeof overrideResponse === 'function'
             ? await overrideResponse(info)
             : overrideResponse
-          : getPatchPetByIdResponseMock();
+          : undefined;
       return typeof resolvedBody === 'string'
         ? HttpResponse.text(resolvedBody, { status: 200 })
         : HttpResponse.json(resolvedBody, { status: 200 });
@@ -403,7 +172,7 @@ export const getShowPetTextMockHandler = (
           ? typeof overrideResponse === 'function'
             ? await overrideResponse(info)
             : overrideResponse
-          : getShowPetTextResponseMock();
+          : undefined;
       const textBody =
         typeof resolvedBody === 'string'
           ? resolvedBody
@@ -451,7 +220,7 @@ export const getDownloadFileMockHandler = (
           ? typeof overrideResponse === 'function'
             ? await overrideResponse(info)
             : overrideResponse
-          : getDownloadFileResponseMock();
+          : undefined;
       return HttpResponse.arrayBuffer(
         binaryBody instanceof ArrayBuffer ? binaryBody : new ArrayBuffer(0),
         {

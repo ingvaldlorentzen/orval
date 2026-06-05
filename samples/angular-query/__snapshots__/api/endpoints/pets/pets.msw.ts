@@ -4,129 +4,10 @@
  * Swagger Petstore
  * OpenAPI spec version: 1.0.0
  */
-import { faker } from '@faker-js/faker';
-
 import { HttpResponse, http } from 'msw';
 import type { RequestHandlerOptions } from 'msw';
 
 import type { Pet, Pets } from '../../model';
-
-export const getSearchPetsResponseMock = (): Pets =>
-  Array.from(
-    { length: faker.number.int({ min: 1, max: 10 }) },
-    (_, i) => i + 1,
-  ).map(() => ({
-    id: faker.number.int(),
-    name: (() => faker.person.lastName())(),
-    tag: (() => faker.person.lastName())(),
-    requiredNullableString: faker.helpers.arrayElement([
-      faker.string.alpha({ length: { min: 10, max: 20 } }),
-      null,
-    ]),
-    optionalNullableString: faker.helpers.arrayElement([
-      faker.helpers.arrayElement([
-        faker.string.alpha({ length: { min: 10, max: 20 } }),
-        null,
-      ]),
-      undefined,
-    ]),
-  }));
-
-export const getListPetsResponseMock = (): Pets =>
-  faker.helpers.arrayElement([
-    Array.from(
-      { length: faker.number.int({ min: 1, max: 10 }) },
-      (_, i) => i + 1,
-    ).map(() => ({
-      id: (() => faker.number.int({ min: 1, max: 99999 }))(),
-      name: (() => faker.person.lastName())(),
-      tag: (() => faker.person.lastName())(),
-      requiredNullableString: faker.helpers.arrayElement([
-        faker.string.alpha({ length: { min: 10, max: 20 } }),
-        null,
-      ]),
-      optionalNullableString: faker.helpers.arrayElement([
-        faker.helpers.arrayElement([
-          faker.string.alpha({ length: { min: 10, max: 20 } }),
-          null,
-        ]),
-        undefined,
-      ]),
-    })),
-    Array.from(
-      { length: faker.number.int({ min: 1, max: 10 }) },
-      (_, i) => i + 1,
-    ).map(() => ({
-      id: (() => faker.number.int({ min: 1, max: 99999 }))(),
-      name: (() => faker.person.lastName())(),
-      tag: (() => faker.person.lastName())(),
-      requiredNullableString: faker.helpers.arrayElement([
-        faker.string.alpha({ length: { min: 10, max: 20 } }),
-        null,
-      ]),
-      optionalNullableString: faker.helpers.arrayElement([
-        faker.helpers.arrayElement([
-          faker.string.alpha({ length: { min: 10, max: 20 } }),
-          null,
-        ]),
-        undefined,
-      ]),
-    })),
-  ]);
-
-export const getShowPetByIdResponseMock = () =>
-  (() => ({
-    id: faker.number.int({ min: 1, max: 99 }),
-    name: faker.person.firstName(),
-    tag: faker.helpers.arrayElement([faker.word.sample(), undefined]),
-  }))();
-
-export const getUpdatePetResponseMock = (
-  overrideResponse: Partial<Extract<Pet, object>> = {},
-): Pet => ({
-  id: faker.number.int(),
-  name: (() => faker.person.lastName())(),
-  tag: (() => faker.person.lastName())(),
-  requiredNullableString: faker.helpers.arrayElement([
-    faker.string.alpha({ length: { min: 10, max: 20 } }),
-    null,
-  ]),
-  optionalNullableString: faker.helpers.arrayElement([
-    faker.helpers.arrayElement([
-      faker.string.alpha({ length: { min: 10, max: 20 } }),
-      null,
-    ]),
-    undefined,
-  ]),
-  ...overrideResponse,
-});
-
-export const getPatchPetResponseMock = (
-  overrideResponse: Partial<Extract<Pet, object>> = {},
-): Pet => ({
-  id: faker.number.int(),
-  name: (() => faker.person.lastName())(),
-  tag: (() => faker.person.lastName())(),
-  requiredNullableString: faker.helpers.arrayElement([
-    faker.string.alpha({ length: { min: 10, max: 20 } }),
-    null,
-  ]),
-  optionalNullableString: faker.helpers.arrayElement([
-    faker.helpers.arrayElement([
-      faker.string.alpha({ length: { min: 10, max: 20 } }),
-      null,
-    ]),
-    undefined,
-  ]),
-  ...overrideResponse,
-});
-
-export const getShowPetTextResponseMock = (): string => faker.word.sample();
-
-export const getDownloadFileResponseMock = (): ArrayBuffer =>
-  new ArrayBuffer(faker.number.int({ min: 1, max: 64 }));
-
-export const getHealthCheckResponseMock = (): string => faker.word.sample();
 
 export const getSearchPetsMockHandler = (
   overrideResponse?:
@@ -144,7 +25,7 @@ export const getSearchPetsMockHandler = (
           ? typeof overrideResponse === 'function'
             ? await overrideResponse(info)
             : overrideResponse
-          : getSearchPetsResponseMock(),
+          : undefined,
         { status: 200 },
       );
     },
@@ -168,7 +49,7 @@ export const getListPetsMockHandler = (
           ? typeof overrideResponse === 'function'
             ? await overrideResponse(info)
             : overrideResponse
-          : getListPetsResponseMock(),
+          : undefined,
         { status: 200 },
       );
     },
@@ -213,7 +94,7 @@ export const getShowPetByIdMockHandler = (
           ? typeof overrideResponse === 'function'
             ? await overrideResponse(info)
             : overrideResponse
-          : getShowPetByIdResponseMock(),
+          : undefined,
         { status: 200 },
       );
     },
@@ -258,7 +139,7 @@ export const getUpdatePetMockHandler = (
           ? typeof overrideResponse === 'function'
             ? await overrideResponse(info)
             : overrideResponse
-          : getUpdatePetResponseMock(),
+          : undefined,
         { status: 200 },
       );
     },
@@ -282,7 +163,7 @@ export const getPatchPetMockHandler = (
           ? typeof overrideResponse === 'function'
             ? await overrideResponse(info)
             : overrideResponse
-          : getPatchPetResponseMock(),
+          : undefined,
         { status: 200 },
       );
     },
@@ -306,7 +187,7 @@ export const getShowPetTextMockHandler = (
           ? typeof overrideResponse === 'function'
             ? await overrideResponse(info)
             : overrideResponse
-          : getShowPetTextResponseMock();
+          : undefined;
       const textBody =
         typeof resolvedBody === 'string'
           ? resolvedBody
@@ -375,7 +256,7 @@ export const getDownloadFileMockHandler = (
           ? typeof overrideResponse === 'function'
             ? await overrideResponse(info)
             : overrideResponse
-          : getDownloadFileResponseMock();
+          : undefined;
       return HttpResponse.arrayBuffer(
         binaryBody instanceof ArrayBuffer ? binaryBody : new ArrayBuffer(0),
         {
@@ -404,7 +285,7 @@ export const getHealthCheckMockHandler = (
           ? typeof overrideResponse === 'function'
             ? await overrideResponse(info)
             : overrideResponse
-          : getHealthCheckResponseMock();
+          : undefined;
       const textBody =
         typeof resolvedBody === 'string'
           ? resolvedBody

@@ -1,15 +1,15 @@
 import {
   DefaultTag,
-  type GeneratorMockOutput,
   type GeneratorMockOutputFull,
   type GeneratorOperation,
-  type GeneratorTarget,
   type GeneratorTargetFull,
   type NormalizedOutputOptions,
   OutputClient,
   type WriteSpecBuilder,
 } from '../types';
 import { compareVersions, kebab, pascal } from '../utils';
+import { flattenMockOutput } from './mock-outputs';
+import type { GeneratorTargetWithFull } from './target';
 
 /**
  * Ensures every operation has at least one tag by falling back to the
@@ -31,15 +31,6 @@ function emptyMockOutputFull(
     type,
     implementation: { function: '', handler: '', handlerName: '' },
     imports: [],
-  };
-}
-
-function flattenMockOutput(full: GeneratorMockOutputFull): GeneratorMockOutput {
-  return {
-    type: full.type,
-    implementation: full.implementation.function + full.implementation.handler,
-    imports: full.imports,
-    strictMockSchemaTypeNames: full.strictMockSchemaTypeNames,
   };
 }
 
@@ -164,7 +155,7 @@ function generateTargetTags(
 export function generateTargetForTags(
   builder: WriteSpecBuilder,
   options: NormalizedOutputOptions,
-) {
+): Record<string, GeneratorTargetWithFull> {
   const isAngularClient = options.client === OutputClient.ANGULAR;
 
   const operations = Object.values(builder.operations).map((operation) =>
@@ -271,11 +262,12 @@ export function generateTargetForTags(
     }
   }
 
-  const result: Record<string, GeneratorTarget> = {};
+  const result: Record<string, GeneratorTargetWithFull> = {};
   for (const [tag, target] of Object.entries(allTargetTags)) {
     result[tag] = {
       ...target,
       mockOutputs: target.mockOutputs.map((m) => flattenMockOutput(m)),
+      mockOutputsFull: target.mockOutputs,
     };
   }
   return result;

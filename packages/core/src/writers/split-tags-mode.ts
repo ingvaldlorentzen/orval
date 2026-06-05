@@ -22,6 +22,11 @@ import { getMockFileExtensionByTypeName } from '../utils/file-extensions';
 import { writeGeneratedFile } from './file';
 import { getFinalizeMockImplementationOptions } from './finalize-mock-implementation';
 import { generateImportsForBuilder } from './generate-imports-for-builder';
+import {
+  buildCrossFileFakerImports,
+  collapseMswFakerFullOutputs,
+  flattenMockOutput,
+} from './mock-outputs';
 import { generateTargetForTags } from './target-tags';
 import { getOrvalGeneratedTypes, getTypedResponse } from './types';
 
@@ -81,7 +86,7 @@ export async function writeSplitTagsMode({
         const {
           imports,
           implementation,
-          mockOutputs,
+          mockOutputsFull,
           mutators,
           clientMutators,
           formData,
@@ -90,6 +95,9 @@ export async function writeSplitTagsMode({
           paramsSerializer,
           paramsFilter,
         } = target;
+
+        const collapsedFull = collapseMswFakerFullOutputs(mockOutputsFull);
+        const mockOutputs = collapsedFull.map((m) => flattenMockOutput(m));
 
         let implementationData = header;
 
@@ -252,16 +260,36 @@ export async function writeSplitTagsMode({
         // current design only non-function generator entries get their own
         // file; ClientMockBuilder functions are not yet supported here.
         const mockPaths: string[] = [];
+
+        const hasFaker = mockOutputs.some(
+          (m) => m.type === OutputMockType.FAKER,
+        );
+        const fakerImplementation =
+          mockOutputs.find((m) => m.type === OutputMockType.FAKER)
+            ?.implementation ?? '';
+
         for (const mockOutput of mockOutputs) {
           const entry = output.mock.generators.find(
             (g): g is GlobalMockOptions =>
               !isFunction(g) && g.type === mockOutput.type,
           );
+
           if (!entry) continue;
 
+          const extraImports =
+            hasFaker && mockOutput.type === OutputMockType.MSW
+              ? buildCrossFileFakerImports(
+                  path.join(dirname, tag, tag + '.msw' + extension),
+                  path.join(dirname, tag, tag + '.faker' + extension),
+                  mockOutput.implementation,
+                  fakerImplementation,
+                )
+              : [];
+
+          const allMockImports = [...mockOutput.imports, ...extraImports];
           const importsMockForBuilder = generateImportsForBuilder(
             output,
-            mockOutput.imports,
+            allMockImports,
             relativeSchemasPath,
           );
 

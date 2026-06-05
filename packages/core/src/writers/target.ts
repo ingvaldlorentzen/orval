@@ -1,5 +1,4 @@
 import {
-  type GeneratorMockOutput,
   type GeneratorMockOutputFull,
   type GeneratorTarget,
   type GeneratorTargetFull,
@@ -8,6 +7,7 @@ import {
   type WriteSpecBuilder,
 } from '../types';
 import { compareVersions, pascal } from '../utils';
+import { flattenMockOutput } from './mock-outputs';
 
 function emptyMockOutputFull(
   type: GeneratorMockOutputFull['type'],
@@ -19,19 +19,21 @@ function emptyMockOutputFull(
   };
 }
 
-function flattenMockOutput(full: GeneratorMockOutputFull): GeneratorMockOutput {
-  return {
-    type: full.type,
-    implementation: full.implementation.function + full.implementation.handler,
-    imports: full.imports,
-    strictMockSchemaTypeNames: full.strictMockSchemaTypeNames,
-  };
+/**
+ * Carries both the flattened `mockOutputs` (consumed by `single`/`tags`
+ * inline writers) and the unflattened `mockOutputsFull` (consumed by the
+ * `split`/`split-tags` writers, which need the `function`/`handler` split to
+ * separate Faker factories from MSW handlers). Sharing one return type lets
+ * every writer destructure what it needs without per-call-site conversion.
+ */
+export interface GeneratorTargetWithFull extends GeneratorTarget {
+  mockOutputsFull: GeneratorMockOutputFull[];
 }
 
 export function generateTarget(
   builder: WriteSpecBuilder,
   options: NormalizedOutputOptions,
-): GeneratorTarget {
+): GeneratorTargetWithFull {
   const operationNames = Object.values(builder.operations).map(
     ({ operationName }) => operationName,
   );
@@ -170,6 +172,7 @@ export function generateTarget(
     imports: target.imports,
     implementation: target.implementation,
     mockOutputs: target.mockOutputs.map((m) => flattenMockOutput(m)),
+    mockOutputsFull: target.mockOutputs,
     mutators: target.mutators,
     clientMutators: target.clientMutators,
     formData: target.formData,
